@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Project Shoulder - Simple Version (Enter key to analyze)
+Project Shoulder - Fixed Version
 """
 
 import os
@@ -10,16 +10,14 @@ import subprocess
 
 print("[DEBUG] 모듈 로딩...")
 
-from google import genai
-from google.genai import types
+import google.generativeai as genai
 from mss import mss
+from PIL import Image
 
 print("[DEBUG] 로드 완료")
 
 
 class ScreenCoach:
-    SYSTEM_PROMPT = """당신은 '숄더'입니다. 화면을 보고 한국어로 3문장 이내로 가이드해주세요."""
-
     def __init__(self):
         api_key = os.getenv('GOOGLE_GENERATIVE_AI_API_KEY')
         if not api_key or len(api_key) < 20:
@@ -27,35 +25,25 @@ class ScreenCoach:
             sys.exit(1)
         
         print(f"[DEBUG] API 키 확인됨: {api_key[:10]}...")
-        self.client = genai.Client(api_key=api_key)
+        genai.configure(api_key=api_key)
+        self.model = genai.GenerativeModel('gemini-2.0-flash')
         self.sct = mss()
         print("[DEBUG] 초기화 완료")
 
     def capture_screen(self):
         print("📸 화면 캡처 중...")
-        screenshot = self.sct.shot()
-        with open(screenshot, "rb") as f:
-            return base64.b64encode(f.read()).decode('utf-8')
+        monitor = self.sct.monitors[1]
+        sct_img = self.sct.grab(monitor)
+        img = Image.frombytes("RGB", sct_img.size, sct_img.bgra, "raw", "BGRX")
+        return img
 
-    def analyze_screen(self, image_base64):
+    def analyze_screen(self, img):
         print("🧠 AI 분석 중...")
         try:
-            response = self.client.models.generate_content(
-                model="gemini-2.0-flash",
-                contents=[
-                    types.Content(
-                        role="user",
-                        parts=[
-                            types.Part.from_text(self.SYSTEM_PROMPT),
-                            types.Part.from_text("이 화면을 분석하고 다음 단계를 안내해주세요."),
-                            types.Part.from_bytes(
-                                data=base64.b64decode(image_base64),
-                                mime_type="image/png"
-                            )
-                        ]
-                    )
-                ]
-            )
+            response = self.model.generate_content([
+                "이 화면을 보고 사용자가 무엇을 하려는지 파악하고, 다음 단계를 한국어로 3문장 이내로 안내해줘.",
+                img
+            ])
             return response.text
         except Exception as e:
             return f"❌ 오류: {e}"
@@ -78,7 +66,6 @@ class ScreenCoach:
                     print("👋 종료합니다")
                     break
                 
-                # 화면 캡처 & 분석
                 img = self.capture_screen()
                 result = self.analyze_screen(img)
                 
