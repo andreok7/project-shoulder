@@ -19,7 +19,7 @@ print("[DEBUG] 로드 완료")
 
 class ScreenCoach:
     def __init__(self):
-        api_key = os.getenv('GOOGLE_GENERATIVE_AI_API_KEY')
+        api_key = os.getenv('GOOGLE_API_KEY') or os.getenv('GOOGLE_GENERATIVE_AI_API_KEY')
         if not api_key or len(api_key) < 20:
             print("❌ API 키가 없거나 유효하지 않습니다!")
             sys.exit(1)
