@@ -138,21 +138,21 @@ class ScreenCoach:
         print("\n" + "="*50)
         print("🎯 Project Shoulder (Debug Mode)")
         print("="*50)
-        print("Cmd+Shift+S: 분석 | Cmd+Shift+Q: 종료")
+        print("Ctrl+Shift+S: 분석 | Ctrl+Shift+Q: 종료")
         print("="*50)
         print("\n[DEBUG] 핫키 리스너 시작...")
         
         # 핫키 등록 확인
         hotkeys = {
-            '<cmd>+<shift>+s': self.on_analyze,
-            '<cmd>+<shift>+q': lambda: (print("[DEBUG] 종료 요청"), False)
+            '<ctrl>+<shift>+s': self.on_analyze,
+            '<ctrl>+<shift>+q': lambda: (print("[DEBUG] 종료 요청"), False)
         }
         print(f"[DEBUG] 등록된 핫키: {list(hotkeys.keys())}")
         
         try:
             with keyboard.GlobalHotKeys(hotkeys) as h:
                 print("[DEBUG] GlobalHotKeys 시작 성공")
-                print("[INFO] 대기 중... Cmd+Shift+S를 누르세요")
+                print("[INFO] 대기 중... Ctrl+Shift+S를 누르세요")
                 h.join()
         except Exception as e:
             print(f"[ERROR] 핫키 리스너 에러: {e}")
