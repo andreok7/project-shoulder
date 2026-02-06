@@ -32,7 +32,8 @@ class ScreenCoach:
 
     def capture_screen(self):
         print("📸 화면 캡처 중...")
-        monitor = self.sct.monitors[1]
+        # monitors[0] = 모든 모니터 합친 전체 화면
+        monitor = self.sct.monitors[0]
         sct_img = self.sct.grab(monitor)
         img = Image.frombytes("RGB", sct_img.size, sct_img.bgra, "raw", "BGRX")
         return img
